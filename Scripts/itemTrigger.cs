@@ -3,7 +3,7 @@
 public class itemTrigger : MonoBehaviour
 {
     Vector3 originalPosition;
-
+    
     // Use this for initialization
     void Start()
     {
@@ -13,7 +13,7 @@ public class itemTrigger : MonoBehaviour
     }
 
     // Called by GazeGestureManager when the user performs a Select gesture
-    void OnSelect()
+    void itemTriggered()
     {
         if (!this.GetComponent<Rigidbody>())
         {

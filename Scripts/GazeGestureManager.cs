@@ -1,8 +1,12 @@
 ﻿using UnityEngine;
 using UnityEngine.VR.WSA.Input;
-
+using UnityEngine.Windows.Speech;
+using System.Collections.Generic;
+using System.Linq;
 public class GazeGestureManager : MonoBehaviour
 {
+    KeywordRecognizer keywordRecognizer = null;
+    Dictionary<string, System.Action> keywords = new Dictionary<string, System.Action>();
     public static GazeGestureManager Instance { get; private set; }
 
     // Represents the hologram that is currently being gazed at.
@@ -23,11 +27,33 @@ public class GazeGestureManager : MonoBehaviour
             if (FocusedObject != null)
             {
                 FocusedObject.SendMessageUpwards("OnSelect");
+
             }
         };
+        keywords.Add("show more", () =>
+        {
+            // Call the OnReset method on every descendant object.
+            if  (FocusedObject != null)
+            {
+                FocusedObject.SendMessageUpwards("itemTriggered");
+            }
+        });
+
+        keywordRecognizer = new KeywordRecognizer(keywords.Keys.ToArray());
+
+        // Register a callback for the KeywordRecognizer and start recognizing!
+        keywordRecognizer.OnPhraseRecognized += KeywordRecognizer_OnPhraseRecognized;
+        keywordRecognizer.Start();
         recognizer.StartCapturingGestures();
     }
-
+    private void KeywordRecognizer_OnPhraseRecognized(PhraseRecognizedEventArgs args)
+    {
+        System.Action keywordAction;
+        if (keywords.TryGetValue(args.text, out keywordAction))
+        {
+            keywordAction.Invoke();
+        }
+    }
     // Update is called once per frame
     void Update()
     {
